@@ -1,0 +1,53 @@
+---
+- hosts: archivers
+
+  tasks:
+  - name: add user
+    user:
+      name: archiveteam
+      shell: /bin/bash
+      system: yes
+      # group: archiveteam #I think this is the default behavior
+
+  - name: Install prereqs
+    apt:
+      name: 
+        - git-core
+        - libgnutls28-dev
+        - lua5.1
+        - liblua5.1-0
+        - liblua5.1-0-dev
+        - screen
+        - python3-dev
+        - python3-pip
+        - bzip2
+        - zlib1g-dev
+        - flex
+        - autoconf
+        - rsync
+        - build-essential
+      state: present
+      update_cache: true
+
+  - name: Install Seesaw
+    pip:
+      name: seesaw
+      executable: pip3
+
+  - name: Install warrior code
+    become: yes
+    become_user: archiveteam
+    git:
+      repo: https://github.com/ArchiveTeam/500px-grab.git
+      dest: /home/archiveteam/500px-grab
+
+  - name: Compile warrior code
+    become: yes
+    become_user: archiveteam
+    command: ./get-wget-lua.sh
+    args:
+      chdir: /home/archiveteam/500px-grab
+      creates: /home/archiveteam/500px-grab/wget-lua
+
+  - name: start thing
+    command: screen -S archiver -d -m su -c "cd /home/archiveteam/500px-grab/; run-pipeline3 pipeline.py --concurrent 1 Phoenix" archiveteam

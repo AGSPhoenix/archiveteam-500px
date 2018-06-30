@@ -1,0 +1,1 @@
+Ansible playbook for configuring hosts to participate in ArchiveTeam's efforts to save 500px's Creative Commons library.
